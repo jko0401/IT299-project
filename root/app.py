@@ -124,7 +124,7 @@ app.layout = html.Div([
 
     html.Div([
         html.H3('Audio Feature Distributions'),
-        html.Div(dcc.Graph(id='div-figures')),
+        html.Div(id='div-figures'),
         html.Div(id='filtered-data-hidden', style={'display': 'none'})
     ], className='pretty_container four columns')
 ])
@@ -161,7 +161,6 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
 )
 def plot_data(df):
     dff = pd.read_json(df, orient='split')
-    temp = []
     figures = []
     for feature in FEATURES.keys():
         if feature == 'popularity' or feature == 'view_count':
@@ -173,12 +172,10 @@ def plot_data(df):
         else:
             bin_size = 20
         f = px.histogram(dff, x=feature, nbins=bin_size, height=300)
-        temp.append(f)
-        for f in temp:
-            f.update_layout(
-                margin=dict(l=20, r=20, t=20, b=20),
-                paper_bgcolor="LightSteelBlue", )
-            figures.append(dcc.Graph(figure=f))
+        f.update_layout(
+            margin=dict(l=20, r=20, t=20, b=20),
+            paper_bgcolor="LightSteelBlue", )
+        figures.append(dcc.Graph(figure=f))
     return figures
 
 
