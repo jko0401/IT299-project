@@ -124,18 +124,7 @@ app.layout = html.Div([
 
     html.Div([
         html.H3('Audio Feature Distributions'),
-        # html.Div(dcc.Graph(id='figures')),
-        html.Div(dcc.Graph(id='tempo')),
-        html.Div(dcc.Graph(id='energy')),
-        html.Div(dcc.Graph(id='danceability')),
-        html.Div(dcc.Graph(id='loudness')),
-        html.Div(dcc.Graph(id='instrumentalness')),
-        html.Div(dcc.Graph(id='speechiness')),
-        html.Div(dcc.Graph(id='valence')),
-        html.Div(dcc.Graph(id='acousticness')),
-        html.Div(dcc.Graph(id='liveness')),
-        # html.Div(dcc.Graph(id='mode')),
-        html.Div(dcc.Graph(id='key')),
+        html.Div(dcc.Graph(id='div-figures')),
         html.Div(id='filtered-data-hidden', style={'display': 'none'})
     ], className='pretty_container four columns')
 ])
@@ -167,43 +156,30 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
 
 
 @app.callback(
-    # Output('figures', 'figure'),
-    [Output('tempo', 'figure'),
-     Output('energy', 'figure'),
-     Output('danceability', 'figure'),
-     Output('loudness', 'figure'),
-     Output('instrumentalness', 'figure'),
-     Output('speechiness', 'figure'),
-     Output('valence', 'figure'),
-     Output('acousticness', 'figure'),
-     Output('liveness', 'figure'),
-     # Output('mode', 'figure'),
-     Output('key', 'figure'),
-     Output('popularity', 'figure'),
-     Output('yt-views', 'figure')],
+    Output('div-figures', 'children'),
     [Input('filtered-data-hidden', 'children')]
 )
-def graph_features(df):
+def plot_data(df):
     dff = pd.read_json(df, orient='split')
-    # figures = []
-    # for feature in FEATURES.keys():
-    #     figures.append(px.histogram(dff, x=features, nbins=20))
-    figure_t = px.histogram(dff, x="tempo", nbins=20, height=300)
-    figure_e = px.histogram(dff, x="energy", nbins=20)
-    figure_dance = px.histogram(dff, x="danceability", nbins=20)
-    figure_loud = px.histogram(dff, x="loudness", nbins=20)
-    figure_i = px.histogram(dff, x="instrumentalness", nbins=20)
-    figure_s = px.histogram(dff, x="speechiness", nbins=20)
-    figure_v = px.histogram(dff, x="valence", nbins=2)
-    figure_a = px.histogram(dff, x="acousticness", nbins=20)
-    figure_l = px.histogram(dff, x="liveness", nbins=20)
-    # figure_m = px.histogram(dff, x="music_mode", nbins=20)
-    figure_k = px.histogram(dff, x="music_key", nbins=22)
-    figure_p = px.histogram(dff, x="popularity", nbins=50)
-    figure_yt = px.histogram(dff, x="view_count", nbins=50)
-    # return figures
-    return figure_t, figure_e, figure_dance, figure_loud, figure_i, figure_s, figure_v, figure_a, figure_l, \
-        figure_k, figure_p, figure_yt
+    temp = []
+    figures = []
+    for feature in FEATURES.keys():
+        if feature == 'popularity' or feature == 'view_count':
+            bin_size = 50
+        elif feature == 'music_key':
+            bin_size = 22
+        elif feature == 'valence':
+            bin_size = 2
+        else:
+            bin_size = 20
+        f = px.histogram(dff, x=feature, nbins=bin_size, height=300)
+        temp.append(f)
+        for f in temp:
+            f.update_layout(
+                margin=dict(l=20, r=20, t=20, b=20),
+                paper_bgcolor="LightSteelBlue", )
+            figures.append(dcc.Graph(figure=f))
+    return figures
 
 
 @app.callback(
