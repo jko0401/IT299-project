@@ -3,15 +3,12 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from sklearn.decomposition import PCA
-import plotly.graph_objects as go
 import plotly.express as px
 import db
 import pandas as pd
+from labels import FEATURES
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+app = dash.Dash(__name__)
 
 df = db.main_db()
 df = df.convert_dtypes()
@@ -28,9 +25,9 @@ def create_options(name, list):
 
 artist_options = create_options('artist_options', df['artistname'].unique())
 channel_options = create_options('channel_options', df['channelname'].unique())
-features = create_options('features', ['popularity', 's_release_date', 'tempo', 'energy', 'danceability',
-                                       'valence', 'acousticness', 'liveness', 'instrumentalness',
-                                       'speechiness', 'view_count'])
+features = [
+    {"label": str(FEATURES[feature]), "value": str(feature)} for feature in FEATURES
+]
 audio_features = ['danceability', 'energy', 'music_key', 'loudness', 'music_mode', 'speechiness',
                   'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo',
                   'time_signature']
@@ -42,71 +39,105 @@ max_y_date = max(df['datepublished'])
 
 app.layout = html.Div([
     html.Div([
-        html.Div([
-            dcc.Dropdown(id='artists',
-                         options=artist_options,
-                         multi=True,
-                         value=['RL Grime', 'TroyBoi', 'Eptic'],
-                         ),
-        ], className='six columns'),
-    ], className='row'),
+       html.H1('Visualizing Trap and Dubstep through YouTube and Spotify Data')
+    ]),
     html.Div([
         html.Div([
-            dcc.DatePickerRange(id='s_date',
-                                start_date=min_s_date,
-                                end_date=max_s_date,
-                                display_format='Y/M/D'
-                                )
-        ], className='six columns'),
-    ], className='row'),
-    html.Div([
+            html.Div([
+                html.H3('Filters'),
+                html.Div([
+                    html.P('Artists:'),
+                    dcc.Dropdown(id='artists',
+                                 options=artist_options,
+                                 multi=True,
+                                 value=['RL Grime', 'TroyBoi', 'Eptic'],
+                                 ),
+                ]),
+            ], className='row'),
+            html.Div([
+                html.Div([
+                    html.P('Channels:'),
+                    dcc.Dropdown(id='channels',
+                                 options=channel_options,
+                                 multi=True,
+                                 value=['TrapNation', 'TrapCity', 'BassNation', 'UKFDubstep',
+                                        'BassMusicMovement', 'DubRebellion']
+                                 ),
+                ]),
+            ], className='row'),
+            html.Div([
+                html.Div([
+                    html.P('Spotify Release Date Range:'),
+                    dcc.DatePickerRange(id='s_date',
+                                        start_date=min_s_date,
+                                        end_date=max_s_date,
+                                        display_format='Y/M/D'
+                                        )
+                ]),
+            ], className='row'),
+            html.Div([
+                html.Div([
+                    html.P('YouTube Publish Date Range:'),
+                    dcc.DatePickerRange(id='y_date',
+                                        start_date=min_y_date,
+                                        end_date=max_y_date,
+                                        display_format='Y/M/D'
+                                        )
+                ]),
+            ], className='row'),
+        ], className='pretty_container'),
         html.Div([
-            dcc.DatePickerRange(id='y_date',
-                                start_date=min_y_date,
-                                end_date=max_y_date,
-                                display_format='Y/M/D'
-                                )
-        ], className='six columns'),
-    ], className='row'),
-    html.Div([
-        html.Div([
-            dcc.Dropdown(id='channels',
-                         options=channel_options,
-                         multi=True,
-                         value=['TrapNation', 'TrapCity', 'BassNation', 'UKFDubstep',
-                                'BassMusicMovement', 'DubRebellion']
-                         ),
-        ], className='six columns'),
-    ], className='row'),
-    html.Div([
-        html.Div([
-            dcc.Dropdown(id='feature-1',
-                         options=features,
-                         value='popularity'
-                         ),
-        ], className='six columns'),
-        html.Div([
-            dcc.Dropdown(id='feature-2',
-                         options=features,
-                         value='energy'
-                         ),
-        ], className='six columns'),
-    ], className='row'),
-    html.Div(dcc.Graph(id='scatter')),
-    html.Div(dcc.Graph(id='pca')),
-    html.Div(dcc.Graph(id='popularity')),
-    html.Div(dcc.Graph(id='release-year')),
-    html.Div(dcc.Graph(id='tempo')),
-    html.Div(dcc.Graph(id='energy')),
-    html.Div(dcc.Graph(id='danceability')),
-    html.Div(dcc.Graph(id='valence')),
-    html.Div(dcc.Graph(id='acousticness')),
-    html.Div(dcc.Graph(id='liveness')),
-    html.Div(dcc.Graph(id='instrumentalness')),
-    html.Div(dcc.Graph(id='speechiness')),
-    html.Div(dcc.Graph(id='yt-views')),
-    html.Div(id='filtered-data-hidden', style={'display': 'none'})
+            html.H3('Popularity'),
+            html.P('Spotify Popularity'),
+            html.Div(dcc.Graph(id='popularity')),
+            html.P('YouTube Plays'),
+            html.Div(dcc.Graph(id='yt-views'))
+        ], className='pretty_container')
+    ], className='three columns'),
 
+    html.Div([
+        html.Div([
+            html.H3('Compare Features'),
+            html.Div([
+                html.Div([
+                    html.P('X-Axis'),
+                    dcc.Dropdown(id='feature-1',
+                                 options=features,
+                                 value='popularity'
+                                 ),
+                ], className='six columns'),
+                html.Div([
+                    html.P('Y-Axis'),
+                    dcc.Dropdown(id='feature-2',
+                                 options=features,
+                                 value='energy'
+                                 ),
+                ], className='six columns'),
+            ], className='row'),
+            html.Div(dcc.Graph(id='scatter')),
+        ], className='pretty_container'),
+        html.Div([
+            html.H3('Similar Tracks'),
+            html.Div(dcc.Graph(id='pca'))
+        ], className='pretty_container')
+    ], className='five columns'),
+
+    html.Div([
+        html.H3('Audio Feature Distributions'),
+        # html.Div(dcc.Graph(id='figures')),
+        html.Div(dcc.Graph(id='tempo')),
+        html.Div(dcc.Graph(id='energy')),
+        html.Div(dcc.Graph(id='danceability')),
+        html.Div(dcc.Graph(id='loudness')),
+        html.Div(dcc.Graph(id='instrumentalness')),
+        html.Div(dcc.Graph(id='speechiness')),
+        html.Div(dcc.Graph(id='valence')),
+        html.Div(dcc.Graph(id='acousticness')),
+        html.Div(dcc.Graph(id='liveness')),
+        # html.Div(dcc.Graph(id='mode')),
+        html.Div(dcc.Graph(id='key')),
+        html.Div(id='filtered-data-hidden', style={'display': 'none'})
+    ], className='pretty_container four columns')
 ])
 
 
@@ -136,33 +167,43 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
 
 
 @app.callback(
-    [Output('popularity', 'figure'),
-     Output('release-year', 'figure'),
-     Output('tempo', 'figure'),
+    # Output('figures', 'figure'),
+    [Output('tempo', 'figure'),
      Output('energy', 'figure'),
      Output('danceability', 'figure'),
+     Output('loudness', 'figure'),
+     Output('instrumentalness', 'figure'),
+     Output('speechiness', 'figure'),
      Output('valence', 'figure'),
      Output('acousticness', 'figure'),
      Output('liveness', 'figure'),
-     Output('instrumentalness', 'figure'),
-     Output('speechiness', 'figure'),
+     # Output('mode', 'figure'),
+     Output('key', 'figure'),
+     Output('popularity', 'figure'),
      Output('yt-views', 'figure')],
     [Input('filtered-data-hidden', 'children')]
 )
 def graph_features(df):
     dff = pd.read_json(df, orient='split')
-    figure_p = px.histogram(dff, x="popularity", nbins=20)
-    figure_release = px.histogram(dff, x="s_release_date", nbins=20)
-    figure_t = px.histogram(dff, x="tempo", nbins=20)
+    # figures = []
+    # for feature in FEATURES.keys():
+    #     figures.append(px.histogram(dff, x=features, nbins=20))
+    figure_t = px.histogram(dff, x="tempo", nbins=20, height=300)
     figure_e = px.histogram(dff, x="energy", nbins=20)
     figure_dance = px.histogram(dff, x="danceability", nbins=20)
-    figure_v = px.histogram(dff, x="valence", nbins=20)
-    figure_a = px.histogram(dff, x="acousticness", nbins=20)
-    figure_l = px.histogram(dff, x="liveness", nbins=20)
+    figure_loud = px.histogram(dff, x="loudness", nbins=20)
     figure_i = px.histogram(dff, x="instrumentalness", nbins=20)
     figure_s = px.histogram(dff, x="speechiness", nbins=20)
+    figure_v = px.histogram(dff, x="valence", nbins=2)
+    figure_a = px.histogram(dff, x="acousticness", nbins=20)
+    figure_l = px.histogram(dff, x="liveness", nbins=20)
+    # figure_m = px.histogram(dff, x="music_mode", nbins=20)
+    figure_k = px.histogram(dff, x="music_key", nbins=22)
+    figure_p = px.histogram(dff, x="popularity", nbins=50)
     figure_yt = px.histogram(dff, x="view_count", nbins=50)
-    return figure_p, figure_release, figure_t, figure_e, figure_dance, figure_v, figure_a, figure_l, figure_i, figure_s, figure_yt
+    # return figures
+    return figure_t, figure_e, figure_dance, figure_loud, figure_i, figure_s, figure_v, figure_a, figure_l, \
+        figure_k, figure_p, figure_yt
 
 
 @app.callback(
