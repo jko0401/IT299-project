@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 import plotly.express as px
 import db
 import pandas as pd
-from labels import FEATURES
+from labels import FEATURES, POPULARITY, SCATTER
 
 app = dash.Dash(__name__)
 
@@ -28,11 +28,14 @@ channel_options = create_options('channel_options', df['channelname'].unique())
 features = [
     {"label": str(FEATURES[feature]), "value": str(feature)} for feature in FEATURES
 ]
+scatter = [
+    {"label": str(SCATTER[feature]), "value": str(feature)} for feature in SCATTER
+]
 audio_features = ['danceability', 'energy', 'music_key', 'loudness', 'music_mode', 'speechiness',
                   'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo',
                   'time_signature']
 
-min_s_date = min(df['s_release_date'])
+min_s_date = '2009-1-1'
 max_s_date = max(df['s_release_date'])
 min_y_date = min(df['datepublished'])
 max_y_date = max(df['datepublished'])
@@ -66,6 +69,17 @@ app.layout = html.Div([
                 ]),
             ], className='row'),
             html.Div([
+                html.P('Differentiate Data Points By:'),
+                dcc.RadioItems(
+                    id='color',
+                    options=[
+                        {'label': 'Artists', 'value': 'artistname'},
+                        {'label': 'Channels', 'value': 'channelname'},
+                    ],
+                    value='artistname',
+                    labelStyle={'display': 'inline-block'})
+            ], className='row'),
+            html.Div([
                 html.Div([
                     html.P('Spotify Release Date Range:'),
                     dcc.DatePickerRange(id='s_date',
@@ -88,10 +102,7 @@ app.layout = html.Div([
         ], className='pretty_container'),
         html.Div([
             html.H3('Popularity'),
-            html.P('Spotify Popularity'),
-            html.Div(dcc.Graph(id='popularity')),
-            html.P('YouTube Plays'),
-            html.Div(dcc.Graph(id='yt-views'))
+            html.Div(id='div-popularity')
         ], className='pretty_container')
     ], className='three columns'),
 
@@ -102,14 +113,14 @@ app.layout = html.Div([
                 html.Div([
                     html.P('X-Axis'),
                     dcc.Dropdown(id='feature-1',
-                                 options=features,
+                                 options=scatter,
                                  value='popularity'
                                  ),
                 ], className='six columns'),
                 html.Div([
                     html.P('Y-Axis'),
                     dcc.Dropdown(id='feature-2',
-                                 options=features,
+                                 options=scatter,
                                  value='energy'
                                  ),
                 ], className='six columns'),
@@ -149,32 +160,51 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
         df_filtered = df[df['channelname'].isin(channels) &
                          df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
                          df['datepublished'].isin(pd.date_range(start_y, end_y))]
-    # data = df_filtered.to_dict('records')
-    # columns = [{"name": i, "id": i} for i in df_filtered.columns]
-    # return dash_table.DataTable(data=data, columns=columns)
     return df_filtered.to_json(date_format='iso', orient='split')
 
 
 @app.callback(
     Output('div-figures', 'children'),
-    [Input('filtered-data-hidden', 'children')]
+    [Input('filtered-data-hidden', 'children'),
+     Input('color', 'value')]
 )
-def plot_data(df):
+def plot_data(df, color):
     dff = pd.read_json(df, orient='split')
     figures = []
     for feature in FEATURES.keys():
-        if feature == 'popularity' or feature == 'view_count':
-            bin_size = 50
-        elif feature == 'music_key':
+        if feature == 'music_key':
             bin_size = 22
         elif feature == 'valence':
             bin_size = 2
         else:
             bin_size = 20
-        f = px.histogram(dff, x=feature, nbins=bin_size, height=300)
+        f = px.histogram(dff, x=feature, nbins=bin_size, height=300, color=color)
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="LightSteelBlue", )
+            paper_bgcolor="LightSteelBlue",
+            showlegend=False)
+        figures.append(dcc.Graph(figure=f))
+    return figures
+
+
+@app.callback(
+    Output('div-popularity', 'children'),
+    [Input('filtered-data-hidden', 'children'),
+     Input('color', 'value')]
+)
+def plot_pop(df, color):
+    dff = pd.read_json(df, orient='split')
+    figures = []
+    for feature in POPULARITY.keys():
+        if feature == 'popularity':
+            bin_size = 20
+        else:
+            bin_size = 200
+        f = px.histogram(dff, x=feature, nbins=bin_size, color=color, height=400)
+        f.update_layout(
+            margin=dict(l=20, r=20, t=20, b=20),
+            paper_bgcolor="LightSteelBlue",
+            showlegend=False)
         figures.append(dcc.Graph(figure=f))
     return figures
 
@@ -183,11 +213,24 @@ def plot_data(df):
     Output('scatter', 'figure'),
     [Input('filtered-data-hidden', 'children'),
      Input('feature-1', 'value'),
-     Input('feature-2', 'value')]
+     Input('feature-2', 'value'),
+     Input('color', 'value')]
 )
-def graph_scatter(df, feature_1, feature_2):
+def graph_scatter(df, feature_1, feature_2, color):
     dff = pd.read_json(df, orient='split')
-    figure = px.scatter(dff, x=feature_1, y=feature_2, hover_name='s_track_name')
+    figure = px.scatter(dff, x=feature_1, y=feature_2, hover_name='s_track_name', color=color, height=1000)
+    figure.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="middle",
+            y=1.02,
+            xanchor="center",
+            x=0.5,
+            font=dict(
+                size=12,
+            )
+        )
+    )
     return figure
 
 
@@ -201,7 +244,7 @@ def pca(df):
     X_id = pd.merge(dff[['s_track_name', 's_id']], dff[audio_features], left_index=True, right_index=True)
     pca = PCA(n_components=2)
     components = pca.fit_transform(X)
-    figure = px.scatter(components, x=0, y=1, hover_name=X_id['s_track_name'])
+    figure = px.scatter(components, x=0, y=1, hover_name=X_id['s_track_name'], height=1000)
     return figure
 
 

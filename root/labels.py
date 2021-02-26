@@ -1,4 +1,19 @@
 FEATURES = dict(
+    s_release_date='Spotify Release Date',
+    datepublished='YouTube Publish Date',
+    tempo='Tempo',
+    energy='Energy',
+    danceability='Danceability',
+    loudness='Loudness',
+    instrumentalness='Instrumentalness',
+    liveness='Liveness',
+    valence='Positiveness',
+    speechiness='Speechiness',
+    acousticness='Acousticness',
+    music_key='Key',
+)
+
+SCATTER = dict(
     popularity='Popularity',
     s_release_date='Spotify Release Date',
     datepublished='YouTube Publish Date',
@@ -6,13 +21,16 @@ FEATURES = dict(
     energy='Energy',
     danceability='Danceability',
     loudness='Loudness',
+    instrumentalness='Instrumentalness',
+    liveness='Liveness',
     valence='Positiveness',
     speechiness='Speechiness',
     acousticness='Acousticness',
-    instrumentalness='Instrumentalness',
-    liveness='Liveness',
     music_key='Key',
     view_count='YouTube Play Count'
 )
 
-FIGURES = {f: 'figure_'+f[0:2] for f in FEATURES.keys()}
+POPULARITY = dict(
+    popularity='Popularity',
+    view_count='YouTube Play Count'
+)
