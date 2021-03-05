@@ -103,6 +103,10 @@ app.layout = html.Div([
         html.Div([
             html.H3('Popularity'),
             html.Div(id='div-popularity')
+        ], className='pretty_container'),
+        html.Div([
+            html.H3('Selected Track'),
+            html.Div(id='div-video')
         ], className='pretty_container')
     ], className='three columns'),
 
@@ -204,7 +208,8 @@ def plot_pop(df, color):
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
             paper_bgcolor="LightSteelBlue",
-            showlegend=False)
+            showlegend=False
+        )
         figures.append(dcc.Graph(figure=f))
     return figures
 
@@ -218,7 +223,8 @@ def plot_pop(df, color):
 )
 def graph_scatter(df, feature_1, feature_2, color):
     dff = pd.read_json(df, orient='split')
-    figure = px.scatter(dff, x=feature_1, y=feature_2, hover_name='s_track_name', color=color, height=1000)
+    figure = px.scatter(dff, x=feature_1, y=feature_2, custom_data=['videoid'],
+                        hover_name='s_track_name', color=color, height=1000)
     figure.update_layout(
         legend=dict(
             orientation="h",
@@ -246,6 +252,18 @@ def pca(df):
     components = pca.fit_transform(X)
     figure = px.scatter(components, x=0, y=1, hover_name=X_id['s_track_name'], height=1000)
     return figure
+
+
+@app.callback(
+    Output('div-video', 'children'),
+    Input('pca', 'clickData'))
+def display_selected_data(selectedData):
+    if not selectedData:
+        return dash.no_update
+    else:
+        dff = db.track_id(selectedData['points'][0]['hovertext'])
+        vid_link = "https://www.youtube.com/embed/" + dff['videoid'][0]
+        return html.Iframe(src=vid_link)
 
 
 if __name__ == '__main__':
