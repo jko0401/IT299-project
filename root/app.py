@@ -185,8 +185,11 @@ def plot_data(df, color):
         f = px.histogram(dff, x=feature, nbins=bin_size, height=300, color=color)
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="LightSteelBlue",
-            showlegend=False)
+            paper_bgcolor="#4e4e50",
+            showlegend=False,
+            font_color="white",
+            xaxis_title=FEATURES[feature]
+        )
         figures.append(dcc.Graph(figure=f))
     return figures
 
@@ -207,8 +210,10 @@ def plot_pop(df, color):
         f = px.histogram(dff, x=feature, nbins=bin_size, color=color, height=400)
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="LightSteelBlue",
-            showlegend=False
+            paper_bgcolor="#4e4e50",
+            showlegend=False,
+            font_color="white",
+            xaxis_title=POPULARITY[feature]
         )
         figures.append(dcc.Graph(figure=f))
     return figures
@@ -226,6 +231,11 @@ def graph_scatter(df, feature_1, feature_2, color):
     figure = px.scatter(dff, x=feature_1, y=feature_2, custom_data=['videoid'],
                         hover_name='s_track_name', color=color, height=1000)
     figure.update_layout(
+        paper_bgcolor="#4e4e50",
+        showlegend=False,
+        font_color="white",
+        xaxis_title=SCATTER[feature_1],
+        yaxis_title=SCATTER[feature_2],
         legend=dict(
             orientation="h",
             yanchor="middle",
@@ -251,6 +261,13 @@ def pca(df):
     pca = PCA(n_components=2)
     components = pca.fit_transform(X)
     figure = px.scatter(components, x=0, y=1, hover_name=X_id['s_track_name'], height=1000)
+    figure.update_layout(
+        paper_bgcolor="#4e4e50",
+        showlegend=False,
+        font_color="white",
+        xaxis_title='Principal Component 1',
+        yaxis_title='Principal Component 2'
+    )
     return figure
 
 
@@ -259,7 +276,7 @@ def pca(df):
     Input('pca', 'clickData'))
 def display_selected_data(selectedData):
     if not selectedData:
-        return dash.no_update
+        return html.P('(Click on a datapoint on the Similar Tracks graph to listen to the track)')
     else:
         dff = db.track_id(selectedData['points'][0]['hovertext'])
         vid_link = "https://www.youtube.com/embed/" + dff['videoid'][0]

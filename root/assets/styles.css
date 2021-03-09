@@ -45,11 +45,11 @@
 
 .pretty_container {
   border-radius: 5px;
-  background-color: #f9f9f9;
+  background-color: #282828;
   margin: 5px;
   padding: 10px;
   position: relative;
-  box-shadow: 2px 2px 2px lightgrey;
+  box-shadow: 2px 2px 2px #5c5c5e;
 }
 
 .column,
@@ -138,11 +138,13 @@ are based on 10px sizing. So basically 1.5rem = 15px :) */
 html {
   font-size: 62.5%; }
 body {
+  margin: 0;
   font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.6;
   font-weight: 400;
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: rgb(50, 50, 50); }
+  background-color: #1a1a1d;
+  color: #ffffff; }
 
 
 /* Typography
