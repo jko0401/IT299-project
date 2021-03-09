@@ -44,12 +44,12 @@
   box-sizing: border-box; }
 
 .pretty_container {
-  border-radius: 5px;
-  background-color: #282828;
-  margin: 5px;
+  border-radius: 15px;
+  background-color: #393e46;
+  margin: 10px;
   padding: 10px;
   position: relative;
-  box-shadow: 2px 2px 2px #5c5c5e;
+  /*box-shadow: 2px 2px 2px #5c5c5e;*/
 }
 
 .column,
@@ -79,9 +79,9 @@
   .one.column,
   .one.columns                    { width: 4.66666666667%; }
   .two.columns                    { width: 13.3333333333%; }
-  .three.columns                  { width: 22%;            }
-  .four.columns                   { width: 30.6666666667%; }
-  .five.columns                   { width: 39.3333333333%; }
+  .three.columns                  { width: 24%;            }
+  .four.columns                   { width: 32.6666666667%; }
+  .five.columns                   { width: 43.3333333333%; }
   .six.columns                    { width: 48%;            }
   .seven.columns                  { width: 56.6666666667%; }
   .eight.columns                  { width: 65.3333333333%; }
@@ -143,8 +143,8 @@ body {
   line-height: 1.6;
   font-weight: 400;
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background-color: #1a1a1d;
-  color: #ffffff; }
+  background-color: #222831;
+  color: #eeeeee; }
 
 
 /* Typography
@@ -258,8 +258,8 @@ textarea,
 select {
   height: 38px;
   padding: 6px 10px; /* The 6px vertically centers text on FF, ignored by Webkit */
-  background-color: #fff;
-  border: 1px solid #D1D1D1;
+  background-color: #222831;
+  border: 1px solid #EEEEEE;
   border-radius: 4px;
   box-shadow: none;
   box-sizing: border-box;
@@ -290,7 +290,7 @@ input[type="url"]:focus,
 input[type="password"]:focus,
 textarea:focus,
 select:focus {
-  border: 1px solid #33C3F0;
+  border: 1px solid #000000;
   outline: 0; }
 label,
 legend {
@@ -403,26 +403,88 @@ hr {
 
 /* Media Queries
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-/*
-Note: The best way to structure the use of media queries is to create the queries
-near the relevant code. For example, if you wanted to change the styles for buttons
-on small devices, paste the mobile query code up in the buttons section and style it
-there.
-*/
+@media screen and (min-width: 800px){
+  .tab--selected.jsx-3468109796, .tab.jsx-3468109796:last-of-type.tab--selected {
+    border-top: 5px solid #00adb5;
+    background-color: #eeeeee;
+    color: #222831;
+    font-size: 30px
+  }
 
 
-/* Larger than mobile */
-@media (min-width: 400px) {}
 
-/* Larger than phablet (also point when grid becomes active) */
-@media (min-width: 550px) {}
+  .tab.jsx-3468109796 {
+    border: 1px solid #d6d6d6;
+    border-right: none;
+    width: calc(100% / 2);
+    background-color: #222831;
+    color: #eeeeee;
+    font-size: 30px
+  }
+}
 
-/* Larger than tablet */
-@media (min-width: 750px) {}
+/* DCC Overrides
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.Select-control {
+  background-color: #222831;
+  height: 2.6em;
+  border: 1px solid #eeeeee;
+  border-radius: 5px;
+  color: #00adb5
+}
 
-/* Larger than desktop */
-@media (min-width: 1000px) {}
+.is-open>.Select-control {
+  background: #222831;
+}
 
-/* Larger than Desktop HD */
-@media (min-width: 1200px) {}
+.has-value.Select--single>.Select-control .Select-value .Select-value-label, .has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-label {
+    color: #00adb5;
+}
 
+.VirtualizedSelectOption {
+    background-color: #222831;
+    color: #00adb5;
+}
+
+.VirtualizedSelectFocusedOption {
+    background-color: #00adb5;
+    font-size: 15px;
+    color: black;
+}
+
+.Select--multi .Select-value {
+  color: #00adb5;
+  font-size: 1em
+}
+
+.DateInput_input {
+  color: #00adb5
+}
+
+.DateInput {
+    margin: 0;
+    padding: 0;
+    background: #393e46;
+    position: relative;
+    display: inline-block;
+    width: 46.95%;
+}
+
+.DateRangePickerInput {
+  background-color: #222831;
+}
+
+.CalendarDay__selected_span {
+    background: #00adb5;
+    border: 1px double #009299;
+    color: #000000;
+}
+
+.DateRangePickerInput_arrow_svg {
+  vertical-align: middle;
+  fill: #eeeeee;
+}
+
+.DateRangePickerInput__withBorder {
+    border: 1px solid #393e46;
+}

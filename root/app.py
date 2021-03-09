@@ -44,104 +44,119 @@ app.layout = html.Div([
     html.Div([
        html.H1('Visualizing Trap and Dubstep through YouTube and Spotify Data')
     ]),
-    html.Div([
-        html.Div([
-            html.Div([
-                html.H3('Filters'),
-                html.Div([
-                    html.P('Artists:'),
-                    dcc.Dropdown(id='artists',
-                                 options=artist_options,
-                                 multi=True,
-                                 value=['RL Grime', 'TroyBoi', 'Eptic'],
-                                 ),
-                ]),
-            ], className='row'),
-            html.Div([
-                html.Div([
-                    html.P('Channels:'),
-                    dcc.Dropdown(id='channels',
-                                 options=channel_options,
-                                 multi=True,
-                                 value=['TrapNation', 'TrapCity', 'BassNation', 'UKFDubstep',
-                                        'BassMusicMovement', 'DubRebellion']
-                                 ),
-                ]),
-            ], className='row'),
-            html.Div([
-                html.P('Differentiate Data Points By:'),
-                dcc.RadioItems(
-                    id='color',
-                    options=[
-                        {'label': 'Artists', 'value': 'artistname'},
-                        {'label': 'Channels', 'value': 'channelname'},
-                    ],
-                    value='artistname',
-                    labelStyle={'display': 'inline-block'})
-            ], className='row'),
-            html.Div([
-                html.Div([
-                    html.P('Spotify Release Date Range:'),
-                    dcc.DatePickerRange(id='s_date',
-                                        start_date=min_s_date,
-                                        end_date=max_s_date,
-                                        display_format='Y/M/D'
-                                        )
-                ]),
-            ], className='row'),
-            html.Div([
-                html.Div([
-                    html.P('YouTube Publish Date Range:'),
-                    dcc.DatePickerRange(id='y_date',
-                                        start_date=min_y_date,
-                                        end_date=max_y_date,
-                                        display_format='Y/M/D'
-                                        )
-                ]),
-            ], className='row'),
-        ], className='pretty_container'),
-        html.Div([
-            html.H3('Popularity'),
-            html.Div(id='div-popularity')
-        ], className='pretty_container'),
-        html.Div([
-            html.H3('Selected Track'),
-            html.Div(id='div-video')
-        ], className='pretty_container')
-    ], className='three columns'),
 
-    html.Div([
-        html.Div([
-            html.H3('Compare Features'),
+    dcc.Tabs([
+        dcc.Tab(label='Introduction', children=[
+            html.Div([
+                html.H1('TEST')
+            ], className='five columns pretty_container')
+        ]),
+        dcc.Tab(label='Dashboard', children=[
+            # Filters, Popularity Plots, Video
             html.Div([
                 html.Div([
-                    html.P('X-Axis'),
-                    dcc.Dropdown(id='feature-1',
-                                 options=scatter,
-                                 value='popularity'
-                                 ),
-                ], className='six columns'),
+                    html.Div([
+                        html.H4('Filters'),
+                        html.Div([
+                            html.P('Artists:'),
+                            dcc.Dropdown(id='artists',
+                                         options=artist_options,
+                                         multi=True,
+                                         value=['RL Grime', 'TroyBoi', 'Eptic'],
+                                         ),
+                        ]),
+                    ], className='row'),
+                    html.Div([
+                        html.Div([
+                            html.P('Channels:'),
+                            dcc.Dropdown(id='channels',
+                                         options=channel_options,
+                                         multi=True,
+                                         value=['TrapNation', 'TrapCity', 'BassNation', 'UKFDubstep',
+                                                'BassMusicMovement', 'DubRebellion']
+                                         ),
+                        ]),
+                    ], className='row'),
+                    html.Div([
+                        html.P('Differentiate Data Points By:'),
+                        dcc.RadioItems(
+                            id='color',
+                            options=[
+                                {'label': 'Artists', 'value': 'artistname'},
+                                {'label': 'Channels', 'value': 'channelname'},
+                            ],
+                            value='artistname',
+                            labelStyle={'display': 'inline-block'})
+                    ], className='row'),
+                    html.Div([
+                        html.Div([
+                            html.P('Spotify Release Date Range:'),
+                            dcc.DatePickerRange(id='s_date',
+                                                start_date=min_s_date,
+                                                end_date=max_s_date,
+                                                display_format='Y/M/D'
+                                                )
+                        ]),
+                    ], className='row'),
+                    html.Div([
+                        html.Div([
+                            html.P('YouTube Publish Date Range:'),
+                            dcc.DatePickerRange(id='y_date',
+                                                start_date=min_y_date,
+                                                end_date=max_y_date,
+                                                display_format='Y/M/D'
+                                                )
+                        ]),
+                    ], className='row'),
+                ], className='pretty_container'),
                 html.Div([
-                    html.P('Y-Axis'),
-                    dcc.Dropdown(id='feature-2',
-                                 options=scatter,
-                                 value='energy'
-                                 ),
-                ], className='six columns'),
-            ], className='row'),
-            html.Div(dcc.Graph(id='scatter')),
-        ], className='pretty_container'),
-        html.Div([
-            html.H3('Similar Tracks'),
-            html.Div(dcc.Graph(id='pca'))
-        ], className='pretty_container')
-    ], className='five columns'),
+                    html.H4('Popularity'),
+                    html.Div(id='div-popularity')
+                ], className='pretty_container'),
+                html.Div([
+                    html.H4('Selected Track'),
+                    html.Div(id='div-video')
+                ], className='pretty_container')
+            ], className='three columns'),
 
-    html.Div([
-        html.H3('Audio Feature Distributions'),
-        html.Div(id='div-figures'),
-        html.Div(id='filtered-data-hidden', style={'display': 'none'})
-    ], className='pretty_container four columns')
+            # Scatter Plots
+            html.Div([
+                html.Div([
+                    html.H4('Compare Features'),
+                    html.Div([
+                        html.Div([
+                            html.P('X-Axis'),
+                            dcc.Dropdown(id='feature-1',
+                                         options=scatter,
+                                         value='popularity'
+                                         ),
+                        ], className='six columns'),
+                        html.Div([
+                            html.P('Y-Axis'),
+                            dcc.Dropdown(id='feature-2',
+                                         options=scatter,
+                                         value='energy'
+                                         ),
+                        ], className='six columns'),
+                    ], className='row'),
+                    html.Div(dcc.Graph(id='scatter')),
+                ], className='pretty_container'),
+                html.Div([
+                    html.H4('Similar Tracks'),
+                    html.Div(dcc.Graph(id='pca'))
+                ], className='pretty_container')
+            ], className='five columns'),
+
+            # Histograms
+            html.Div([
+                html.Div([
+                    html.H4('Audio Feature Distributions'),
+                    html.Div(id='div-figures'),
+                    html.Div(id='filtered-data-hidden', style={'display': 'none'})
+                ], className='pretty_container')
+            ], className='four columns')
+        ])
+    ])
 ])
 
 
@@ -185,9 +200,9 @@ def plot_data(df, color):
         f = px.histogram(dff, x=feature, nbins=bin_size, height=300, color=color)
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="#4e4e50",
+            paper_bgcolor="#393e46",
             showlegend=False,
-            font_color="white",
+            font_color="#eeeeee",
             xaxis_title=FEATURES[feature]
         )
         figures.append(dcc.Graph(figure=f))
@@ -210,9 +225,9 @@ def plot_pop(df, color):
         f = px.histogram(dff, x=feature, nbins=bin_size, color=color, height=400)
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="#4e4e50",
+            paper_bgcolor="#393e46",
             showlegend=False,
-            font_color="white",
+            font_color="#eeeeee",
             xaxis_title=POPULARITY[feature]
         )
         figures.append(dcc.Graph(figure=f))
@@ -231,9 +246,9 @@ def graph_scatter(df, feature_1, feature_2, color):
     figure = px.scatter(dff, x=feature_1, y=feature_2, custom_data=['videoid'],
                         hover_name='s_track_name', color=color, height=1000)
     figure.update_layout(
-        paper_bgcolor="#4e4e50",
+        paper_bgcolor="#393e46",
         showlegend=False,
-        font_color="white",
+        font_color="#eeeeee",
         xaxis_title=SCATTER[feature_1],
         yaxis_title=SCATTER[feature_2],
         legend=dict(
@@ -262,9 +277,9 @@ def pca(df):
     components = pca.fit_transform(X)
     figure = px.scatter(components, x=0, y=1, hover_name=X_id['s_track_name'], height=1000)
     figure.update_layout(
-        paper_bgcolor="#4e4e50",
+        paper_bgcolor="#393e46",
         showlegend=False,
-        font_color="white",
+        font_color="#eeeeee",
         xaxis_title='Principal Component 1',
         yaxis_title='Principal Component 2'
     )
