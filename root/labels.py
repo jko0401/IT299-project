@@ -17,6 +17,7 @@ SCATTER = dict(
     popularity='Popularity',
     s_release_date='Spotify Release Date',
     datepublished='YouTube Publish Date',
+    view_count='YouTube Play Count',
     tempo='Tempo',
     energy='Energy',
     danceability='Danceability',
@@ -27,7 +28,7 @@ SCATTER = dict(
     speechiness='Speechiness',
     acousticness='Acousticness',
     music_key='Key',
-    view_count='YouTube Play Count'
+
 )
 
 POPULARITY = dict(

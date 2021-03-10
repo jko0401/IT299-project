@@ -38,15 +38,14 @@
 .container {
   position: relative;
   width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 20px;
+  margin: 5px;
+  padding: 0 5px;
   box-sizing: border-box; }
 
 .pretty_container {
   border-radius: 15px;
   background-color: #393e46;
-  margin: 10px;
+  margin: 12px 6px;
   padding: 10px;
   position: relative;
   /*box-shadow: 2px 2px 2px #5c5c5e;*/
@@ -68,7 +67,7 @@
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   .container {
-    width: 80%; }
+    width: 100%; }
   .column,
   .columns {
     margin-left: 0%; }
@@ -82,7 +81,7 @@
   .three.columns                  { width: 24%;            }
   .four.columns                   { width: 32.6666666667%; }
   .five.columns                   { width: 43.3333333333%; }
-  .six.columns                    { width: 48%;            }
+  .six.columns                    { width: 50%;            }
   .seven.columns                  { width: 56.6666666667%; }
   .eight.columns                  { width: 65.3333333333%; }
   .nine.columns                   { width: 74.0%;          }
@@ -403,24 +402,42 @@ hr {
 
 /* Media Queries
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-@media screen and (min-width: 800px){
-  .tab--selected.jsx-3468109796, .tab.jsx-3468109796:last-of-type.tab--selected {
-    border-top: 5px solid #00adb5;
+/*@media screen and (min-width: 800px){*/
+/*  .tab--selected.jsx-3468109796, .tab.jsx-3468109796:last-of-type.tab--selected {*/
+/*    border-top: 5px solid #00adb5;*/
+/*    background-color: #eeeeee;*/
+/*    color: #222831;*/
+/*    font-size: 30px*/
+/*  }*/
+
+
+
+/*  .tab.jsx-3468109796 {*/
+/*    border: 1px solid #d6d6d6;*/
+/*    border-right: none;*/
+/*    width: calc(100% / 2);*/
+/*    background-color: #222831;*/
+/*    color: #eeeeee;*/
+/*    font-size: 30px*/
+/*  }*/
+/*}*/
+
+.tab.jsx-3468109796 {
+  margin-bottom: 5px;
+}
+#intro-tab.tab--selected, #dash-tab.tab--selected {
+    border-bottom: #00adb5 solid 6px;
+    border-top: 0px;
+    font-size: 18px;
+    color: #00adb5;
     background-color: #eeeeee;
-    color: #222831;
-    font-size: 30px
-  }
+}
 
-
-
-  .tab.jsx-3468109796 {
-    border: 1px solid #d6d6d6;
-    border-right: none;
-    width: calc(100% / 2);
-    background-color: #222831;
+#intro-tab, #dash-tab {
     color: #eeeeee;
-    font-size: 30px
-  }
+    border: #393e46 solid 2px;
+    font-size: 18px;
+    background-color: #393e46;
 }
 
 /* DCC Overrides
