@@ -39,7 +39,6 @@
   position: relative;
   width: 100%;
   margin: 5px;
-  padding: 0 5px;
   box-sizing: border-box; }
 
 .pretty_container {
@@ -48,7 +47,16 @@
   margin: 12px 6px;
   padding: 10px;
   position: relative;
-  /*box-shadow: 2px 2px 2px #5c5c5e;*/
+}
+
+.video-container {
+    position: relative;
+    width: 96%;
+    height: 0;
+    padding-bottom: 56.25%;
+    border-radius: 15px;
+    background-color: #393e46;
+    margin: 12px 6px;
 }
 
 .column,
@@ -365,19 +373,6 @@ ul,
 ol {
   margin-bottom: 0.75rem; }
 
-/* Utilities
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-.u-full-width {
-  width: 100%;
-  box-sizing: border-box; }
-.u-max-full-width {
-  max-width: 100%;
-  box-sizing: border-box; }
-.u-pull-right {
-  float: right; }
-.u-pull-left {
-  float: left; }
-
 
 /* Misc
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -400,28 +395,8 @@ hr {
   clear: both; }
 
 
-/* Media Queries
+/* Tabs
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-/*@media screen and (min-width: 800px){*/
-/*  .tab--selected.jsx-3468109796, .tab.jsx-3468109796:last-of-type.tab--selected {*/
-/*    border-top: 5px solid #00adb5;*/
-/*    background-color: #eeeeee;*/
-/*    color: #222831;*/
-/*    font-size: 30px*/
-/*  }*/
-
-
-
-/*  .tab.jsx-3468109796 {*/
-/*    border: 1px solid #d6d6d6;*/
-/*    border-right: none;*/
-/*    width: calc(100% / 2);*/
-/*    background-color: #222831;*/
-/*    color: #eeeeee;*/
-/*    font-size: 30px*/
-/*  }*/
-/*}*/
-
 .tab.jsx-3468109796 {
   margin-bottom: 5px;
 }
@@ -466,12 +441,24 @@ hr {
 .VirtualizedSelectFocusedOption {
     background-color: #00adb5;
     font-size: 15px;
-    color: black;
+    color: #222831;
 }
 
 .Select--multi .Select-value {
   color: #00adb5;
   font-size: 1em
+}
+
+.Select.is-disabled>.Select-control {
+    background-color: #222831;
+  border: 1px solid #00adb5;
+  border-radius: 5px;
+}
+
+.Select--multi.is-disabled .Select-value {
+    background-color: #00adb5;
+    border: 1px solid #00adb5;
+    color: #eeeeee;
 }
 
 .DateInput_input {
@@ -504,4 +491,13 @@ hr {
 
 .DateRangePickerInput__withBorder {
     border: 1px solid #393e46;
+}
+
+.video
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }

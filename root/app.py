@@ -40,6 +40,10 @@ max_s_date = max(df['s_release_date'])
 min_y_date = min(df['datepublished'])
 max_y_date = max(df['datepublished'])
 
+color_scheme = ['#00adb5', '#E74C3C', '#3498DB', '#F39C12', '#9B59B6']
+# color_scheme = ['#00adb5', '#3498DB', '#77B0B3', '#7BB8E1', '#222831']
+
+
 app.layout = html.Div([
     html.Div([
        html.H1('Visualizing Trap and Dubstep through YouTube and Spotify Data')
@@ -80,11 +84,16 @@ app.layout = html.Div([
                             html.H4('Filters'),
                             html.Div([
                                 html.P('Artists:'),
-                                dcc.Dropdown(id='artists',
-                                             options=artist_options,
-                                             multi=True,
-                                             value=['RL Grime', 'TroyBoi', 'Eptic'],
-                                             ),
+                                html.Div([
+                                    dcc.Dropdown(id='artists',
+                                                 options=artist_options,
+                                                 multi=True,
+                                                 value=['RL Grime', 'TroyBoi', 'Eptic'],
+                                                 ),
+                                ], className='ten columns'),
+                                html.Div([
+                                    html.Button('Reset', id='reset', n_clicks=0)
+                                ], className='two columns')
                             ]),
                         ], className='row'),
                         html.Div([
@@ -133,10 +142,7 @@ app.layout = html.Div([
                         html.H4('Popularity'),
                         html.Div(id='div-popularity')
                     ], className='pretty_container'),
-                    html.Div([
-                        html.H4('Selected Track'),
-                        html.Div(id='div-video')
-                    ], className='pretty_container')
+                    html.Div(id='div-video')
                 ], className='three columns'),
 
                 # Scatter Plots
@@ -177,7 +183,7 @@ app.layout = html.Div([
                 ], className='four columns')
             ])
         ])
-    ], className='container')
+    ])
 ])
 
 
@@ -196,6 +202,10 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
                          df['channelname'].isin(channels) &
                          df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
                          df['datepublished'].isin(pd.date_range(start_y, end_y))]
+    elif not channels:
+        df_filtered = df[df['artistname'].isin(artists) &
+                         df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
+                         df['datepublished'].isin(pd.date_range(start_y, end_y))]
     else:
         df_filtered = df[df['channelname'].isin(channels) &
                          df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
@@ -204,13 +214,42 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
 
 
 @app.callback(
+    Output('artists', 'disabled'),
+    [Input('artists', 'value')]
+)
+def disable_artists(artists):
+    if len(artists) >= 5:
+        return True
+
+
+@app.callback(
+    Output('artists', 'value'),
+    [Input('reset', 'n_clicks')]
+)
+def reset_artists(n_clicks):
+    ctx = dash.callback_context
+    if ctx.triggered:
+        return []
+
+
+@app.callback(
     Output('div-figures', 'children'),
     [Input('filtered-data-hidden', 'children'),
-     Input('color', 'value')]
+     Input('color', 'value'),
+     Input('artists', 'value'),
+     Input('channels', 'value')]
 )
-def plot_data(df, color):
+def plot_data(df, color, artists, channels):
     dff = pd.read_json(df, orient='split')
     figures = []
+    if artists and channels:
+        color = color
+    elif not artists:
+        color = 'channelname'
+    elif not channels:
+        color = 'artistname'
+    else:
+        color = None
     for feature in FEATURES.keys():
         if feature == 'music_key':
             bin_size = 22
@@ -218,7 +257,8 @@ def plot_data(df, color):
             bin_size = 2
         else:
             bin_size = 20
-        f = px.histogram(dff, x=feature, nbins=bin_size, height=300, color=color)
+        f = px.histogram(dff, x=feature, nbins=bin_size, height=300, color=color,
+                         color_discrete_sequence=color_scheme[:len(artists)])
         f.update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
             paper_bgcolor="#393e46",
@@ -233,11 +273,15 @@ def plot_data(df, color):
 @app.callback(
     Output('div-popularity', 'children'),
     [Input('filtered-data-hidden', 'children'),
-     Input('color', 'value')]
+     Input('color', 'value'),
+     Input('artists', 'value'),
+     Input('channels', 'value')]
 )
-def plot_pop(df, color):
+def plot_pop(df, color, artists, channels):
     dff = pd.read_json(df, orient='split')
     figures = []
+    if not artists or not channels:
+        color = None
     for feature in POPULARITY.keys():
         if feature == 'popularity':
             bin_size = 20
@@ -260,15 +304,29 @@ def plot_pop(df, color):
     [Input('filtered-data-hidden', 'children'),
      Input('feature-1', 'value'),
      Input('feature-2', 'value'),
-     Input('color', 'value')]
+     Input('color', 'value'),
+     Input('artists', 'value'),
+     Input('channels', 'value')]
 )
-def graph_scatter(df, feature_1, feature_2, color):
+def graph_scatter(df, feature_1, feature_2, color, artists, channels):
     dff = pd.read_json(df, orient='split')
+    if artists and channels:
+        color = color
+    elif not artists:
+        color = 'channelname'
+    elif not channels:
+        color = 'artistname'
+    else:
+        color = None
     figure = px.scatter(dff, x=feature_1, y=feature_2, custom_data=['videoid'],
                         hover_name='s_track_name', color=color, height=1000)
+    if color == 'artistname':
+        legend_title = 'Artist'
+    else:
+        legend_title = 'Channel'
     figure.update_layout(
         paper_bgcolor="#393e46",
-        showlegend=False,
+        showlegend=True,
         font_color="#eeeeee",
         xaxis_title=SCATTER[feature_1],
         yaxis_title=SCATTER[feature_2],
@@ -280,7 +338,8 @@ def graph_scatter(df, feature_1, feature_2, color):
             x=0.5,
             font=dict(
                 size=12,
-            )
+            ),
+            title=legend_title
         )
     )
     return figure
@@ -288,9 +347,14 @@ def graph_scatter(df, feature_1, feature_2, color):
 
 @app.callback(
     Output('pca', 'figure'),
-    [Input('filtered-data-hidden', 'children')]
+    [Input('filtered-data-hidden', 'children'),
+     Input('artists', 'value'),
+     Input('channels', 'value')]
 )
-def pca(df):
+def pca(df, artists, channels):
+    if not artists or not channels:
+        return dash.no_update
+
     dff = pd.read_json(df, orient='split')
     X = dff[audio_features].to_numpy(dtype='float')
     X_id = pd.merge(dff[['s_track_name', 's_id']], dff[audio_features], left_index=True, right_index=True)
@@ -312,11 +376,17 @@ def pca(df):
     Input('pca', 'clickData'))
 def display_selected_data(selectedData):
     if not selectedData:
-        return html.P('(Click on a datapoint on the Similar Tracks graph to listen to the track)')
+        return html.Div([
+                    html.H4('Selected Track'),
+                    html.Div(id='div-video'),
+                    html.P('(Click on a datapoint on the Similar Tracks graph to listen to the track)')
+                ], className='pretty_container')
     else:
         dff = db.track_id(selectedData['points'][0]['hovertext'])
         vid_link = "https://www.youtube.com/embed/" + dff['videoid'][0]
-        return html.Iframe(src=vid_link)
+        return html.Div([
+                    html.Iframe(src=vid_link, className='video')
+                ], className='video-container')
 
 
 if __name__ == '__main__':
