@@ -31,7 +31,16 @@ SCATTER = dict(
 
 )
 
-POPULARITY = dict(
+SUMMARY = dict(
     popularity='Popularity',
-    view_count='YouTube Play Count'
+    view_count='YouTube Play Count',
+    tempo='Tempo',
+    energy='Energy',
+    danceability='Danceability',
+    loudness='Loudness',
+    instrumentalness='Instrumentalness',
+    liveness='Liveness',
+    valence='Positiveness',
+    speechiness='Speechiness',
+    acousticness='Acousticness',
 )

@@ -1,12 +1,13 @@
 import dash
-import dash_core_components as dcc
+import dash_core_components as dcc, dash_table
+from dash_table.Format import Format, Scheme
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from sklearn.decomposition import PCA
 import plotly.express as px
 import db
 import pandas as pd
-from labels import FEATURES, POPULARITY, SCATTER
+from labels import FEATURES, SUMMARY, SCATTER
 
 app = dash.Dash(__name__)
 
@@ -31,6 +32,9 @@ features = [
 scatter = [
     {"label": str(SCATTER[feature]), "value": str(feature)} for feature in SCATTER
 ]
+summary = [
+    {"label": str(SUMMARY[feature]), "value": str(feature)} for feature in SUMMARY
+]
 audio_features = ['danceability', 'energy', 'music_key', 'loudness', 'music_mode', 'speechiness',
                   'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo',
                   'time_signature']
@@ -41,47 +45,54 @@ min_y_date = min(df['datepublished'])
 max_y_date = max(df['datepublished'])
 
 color_scheme = ['#00adb5', '#E74C3C', '#3498DB', '#F39C12', '#9B59B6']
-# color_scheme = ['#00adb5', '#3498DB', '#77B0B3', '#7BB8E1', '#222831']
-
 
 app.layout = html.Div([
-    html.Div([
-       html.H1('Visualizing Trap and Dubstep through YouTube and Spotify Data')
-    ]),
+    html.Div(id='main-header', children=[
+        html.Header([
+            html.H1('Visualizing Trap and Dubstep through YouTube and Spotify Data')
+        ])
+    ], className='container'),
     html.Div(id='main-app', children=[
         dcc.Tabs([
             dcc.Tab(id='intro-tab', label='Introduction', children=[
                 html.Div([
-                    html.H2('Welcome'),
-                    html.P('This dashboard allows you to explore the bass electronic music genres of Trap and Dubstep '
+                    html.H2('Welcome!'),
+                    html.P('This dashboard allows you to explore the electronic bass music genres of Trap and Dubstep '
                            'through YouTube and Spotify data. Tracks related to these genres were gathered by scraping '
                            'five popular music-discovering channels on YouTube: TrapNation, TrapCity, BassNation, '
                            'UKFDubstep, and DubRebellion. Audio features data was tied to those that could be found in '
                            'Spotify’s library. Brief explanations of each section of the dashboard below.'),
-                    html.H4('Filters:'),
+                    html.H5('Filters:'),
                     html.P('Choose to filter the dataset by artists or channels, and through different time ranges by YouTube publish or Spotify release dates. Data points can be differentiated by color through artists or channels.'),
-                    html.H4('Popularity:'),
+                    html.H5('Popularity:'),
                     html.P(''),
-                    html.H4('Compare Features:'),
+                    html.H5('Compare Features:'),
                     html.P('Select any two features to compare and see if there is a correlation between them.'),
-                    html.H4('Feature Distributions:'),
-                    html.P('A set of histograms to help visualize the frequency and distribution of audio features pertaining to the tracks of the artists or channels selected.'),
-                    html.H4('Similar Tracks:'),
+                    html.H5('Feature Distributions:'),
+                    html.P('A set of histograms to help visualize the frequency and distribution of audio features pertaining to the tracks of the artists or channels selected. Follow the link below to Spotify\'s explanation of each feature.'),
+                    html.A('Audio Features', href='https://developer.spotify.com/documentation/web-api/reference/#object-audiofeaturesobject'),
+                    html.H5('Similar Tracks:'),
                     html.P('Tracks that are similar in terms of their audio features are grouped together through principal component analysis. The closer the tracks, the more similar they are.'),
-                    html.H4('Selected Track:'),
-                    html.P('Click on any data point on the Similar Tracks graph to load an embedded YouTube video and listen to the track.'),
-                    html.H4('Limitations:'),
-                    html.P('> Dataset is not automatically updated. The most recent data was from the end of January when everything was scraped'),
-                    html.P('> Not all tracks uploaded to YouTube can be found on Spotify. Many SoundCloud-only tracks, unofficial releases, remixes that also represent the genres are not included in this dataset'),
-                    html.P('> Not all Spotify tracks of the artists in this dataset are included, only those uploaded and shared by the five YouTube channels selected.'),
+                    html.H5('Selected Track:'),
+                    html.P('Click on any data point on the Similar Tracks graph to load an embedded YouTube video and listen to the track. Some tracks may have embedding disabled and must be played on YouTube.'),
+                    html.H5('Limitations:'),
+                    html.P('> The dataset does not automatically update. The most recent data was from the end of January when everything was scraped.'),
+                    html.P('> Not all tracks uploaded to YouTube could be found on Spotify. Many SoundCloud-only tracks, unofficial releases, remixes that also represent the genres were not included in this dataset.'),
+                    html.P('> Not all Spotify tracks of artists in this dataset were included, only those uploaded and shared by the five YouTube channels were selected.'),
+                    html.P(''),
+                    html.Div([
+                        html.A(html.Img(src='/assets/github.png'), href='https://github.com'),
+                        html.A(html.Img(src='/assets/website.png'), href='https://jko0401.github.io/')
+                    ], style={'align': 'center'})
                 ], className='six columns pretty_container offset-by-three columns')
+
             ]),
             dcc.Tab(id='dash-tab', label='Dashboard', children=[
                 # Filters, Popularity Plots, Video
                 html.Div([
                     html.Div([
                         html.Div([
-                            html.H4('Filters'),
+                            html.H5('Filters'),
                             html.Div([
                                 html.P('Artists:'),
                                 html.Div([
@@ -90,10 +101,7 @@ app.layout = html.Div([
                                                  multi=True,
                                                  value=['RL Grime', 'TroyBoi', 'Eptic'],
                                                  ),
-                                ], className='ten columns'),
-                                html.Div([
-                                    html.Button('Reset', id='reset', n_clicks=0)
-                                ], className='two columns')
+                                ]),
                             ]),
                         ], className='row'),
                         html.Div([
@@ -139,8 +147,12 @@ app.layout = html.Div([
                         ], className='row'),
                     ], className='pretty_container'),
                     html.Div([
-                        html.H4('Popularity'),
-                        html.Div(id='div-popularity')
+                        html.H5('Feature Summary'),
+                        dcc.Dropdown(id='summary',
+                                     options=summary,
+                                     value='popularity'
+                                     ),
+                        html.Div(id='div-summary')
                     ], className='pretty_container'),
                     html.Div(id='div-video')
                 ], className='three columns'),
@@ -148,7 +160,7 @@ app.layout = html.Div([
                 # Scatter Plots
                 html.Div([
                     html.Div([
-                        html.H4('Compare Features'),
+                        html.H5('Compare Features'),
                         html.Div([
                             html.Div([
                                 html.P('X-Axis'),
@@ -168,7 +180,7 @@ app.layout = html.Div([
                         html.Div(dcc.Graph(id='scatter')),
                     ], className='pretty_container'),
                     html.Div([
-                        html.H4('Similar Tracks'),
+                        html.H5('Similar Tracks'),
                         html.Div(dcc.Graph(id='pca'))
                     ], className='pretty_container')
                 ], className='five columns'),
@@ -176,14 +188,14 @@ app.layout = html.Div([
                 # Histograms
                 html.Div([
                     html.Div([
-                        html.H4('Feature Distributions'),
+                        html.H5('Feature Distributions'),
                         html.Div(id='div-figures'),
                         html.Div(id='filtered-data-hidden', style={'display': 'none'})
                     ], className='pretty_container')
                 ], className='four columns')
             ])
         ])
-    ])
+    ]),
 ])
 
 
@@ -198,12 +210,12 @@ app.layout = html.Div([
 )
 def filter_df(artists, channels, start_s, end_s, start_y, end_y):
     if artists:
-        df_filtered = df[df['artistname'].isin(artists) &
+        df_filtered = df[df['artistname'].isin(artists[:5]) &
                          df['channelname'].isin(channels) &
                          df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
                          df['datepublished'].isin(pd.date_range(start_y, end_y))]
     elif not channels:
-        df_filtered = df[df['artistname'].isin(artists) &
+        df_filtered = df[df['artistname'].isin(artists[:5]) &
                          df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
                          df['datepublished'].isin(pd.date_range(start_y, end_y))]
     else:
@@ -211,25 +223,6 @@ def filter_df(artists, channels, start_s, end_s, start_y, end_y):
                          df['s_release_date'].isin(pd.date_range(start_s, end_s)) &
                          df['datepublished'].isin(pd.date_range(start_y, end_y))]
     return df_filtered.to_json(date_format='iso', orient='split')
-
-
-@app.callback(
-    Output('artists', 'disabled'),
-    [Input('artists', 'value')]
-)
-def disable_artists(artists):
-    if len(artists) >= 5:
-        return True
-
-
-@app.callback(
-    Output('artists', 'value'),
-    [Input('reset', 'n_clicks')]
-)
-def reset_artists(n_clicks):
-    ctx = dash.callback_context
-    if ctx.triggered:
-        return []
 
 
 @app.callback(
@@ -270,32 +263,39 @@ def plot_data(df, color, artists, channels):
     return figures
 
 
+def highlight_max_row(df):
+    df_numeric_columns = df.select_dtypes('number')
+    return [
+        {
+            'if': {
+                'filter_query': '{{id}} = {}'.format(i),
+                'column_id': col
+            },
+            'backgroundColor': '#3D9970',
+            'color': 'white'
+        }
+        # idxmax(axis=1) finds the max indices of each row
+        for (i, col) in enumerate(
+            df_numeric_columns.idxmax(axis=1)
+        )
+    ]
+
 @app.callback(
-    Output('div-popularity', 'children'),
+    Output('div-summary', 'children'),
     [Input('filtered-data-hidden', 'children'),
      Input('color', 'value'),
-     Input('artists', 'value'),
-     Input('channels', 'value')]
+     Input('summary', 'value')]
 )
-def plot_pop(df, color, artists, channels):
+def summary_table(df, color, summary):
     dff = pd.read_json(df, orient='split')
-    figures = []
-    if not artists or not channels:
-        color = None
-    for feature in POPULARITY.keys():
-        if feature == 'popularity':
-            bin_size = 20
-        else:
-            bin_size = 200
-        f = px.histogram(dff, x=feature, nbins=bin_size, color=color, height=400)
-        f.update_layout(
-            margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="#393e46",
-            showlegend=False,
-            font_color="#eeeeee",
-            xaxis_title=POPULARITY[feature]
-        )
-        figures.append(dcc.Graph(figure=f))
+    test_sum = dff.groupby('artistname').agg({summary: ['mean', 'min', 'max']}).round(2).transpose()
+    test_sum = pd.DataFrame(test_sum)
+    figures = dash_table.DataTable(
+        data=test_sum.to_dict('records'),
+        sort_action='native',
+        columns=[{'name': str(i), 'id': str(i)} for i in test_sum.columns],
+        style_data_conditional=highlight_max_row(test_sum)
+    )
     return figures
 
 
@@ -377,7 +377,7 @@ def pca(df, artists, channels):
 def display_selected_data(selectedData):
     if not selectedData:
         return html.Div([
-                    html.H4('Selected Track'),
+                    html.H5('Selected Track'),
                     html.Div(id='div-video'),
                     html.P('(Click on a datapoint on the Similar Tracks graph to listen to the track)')
                 ], className='pretty_container')
