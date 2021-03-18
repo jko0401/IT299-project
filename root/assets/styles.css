@@ -417,12 +417,20 @@ hr {
 
 /* DCC Overrides
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
-.Select-control {
-  background-color: #222831;
-  height: 2.6em;
-  border: 1px solid #eeeeee;
-  border-radius: 5px;
-  color: #00adb5
+.Select-control, .Select-placeholder {
+    background-color: #222831 !important;
+    border-radius: 5px;
+    border: 1px solid #eeeeee !important;
+    color: #00adb5 !important;
+    cursor: default;
+    display: table;
+    border-spacing: 0;
+    border-collapse: separate;
+    outline: none;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+
 }
 
 .is-open>.Select-control {
@@ -430,35 +438,28 @@ hr {
 }
 
 .has-value.Select--single>.Select-control .Select-value .Select-value-label, .has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-label {
-    color: #00adb5;
+    color: #00adb5 !important;
 }
 
 .VirtualizedSelectOption {
     background-color: #222831;
-    color: #00adb5;
+    font-size: 13px;
+    color: #eeeeee;
 }
 
 .VirtualizedSelectFocusedOption {
-    background-color: #00adb5;
+    background-color: #00adb5 !important;
     font-size: 15px;
-    color: #222831;
+    color: #222831 !important;
 }
 
 .Select--multi .Select-value {
-  color: #00adb5;
+  color: #00adb5 !important;
   font-size: 1em
 }
 
-.Select.is-disabled>.Select-control {
-    background-color: #222831;
-  border: 1px solid #00adb5;
-  border-radius: 5px;
-}
-
-.Select--multi.is-disabled .Select-value {
-    background-color: #00adb5;
-    border: 1px solid #00adb5;
-    color: #eeeeee;
+.Select.has-value.Select--single > .Select-control .Select-value .Select-value-label, .Select.has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
+    color: #00adb5;
 }
 
 .DateInput_input {

@@ -1,6 +1,5 @@
 import dash
 import dash_core_components as dcc, dash_table
-from dash_table.Format import Format, Scheme
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from sklearn.decomposition import PCA
@@ -49,7 +48,7 @@ color_scheme = ['#00adb5', '#E74C3C', '#3498DB', '#F39C12', '#9B59B6']
 app.layout = html.Div([
     html.Div(id='main-header', children=[
         html.Header([
-            html.H1('Visualizing Trap and Dubstep through YouTube and Spotify Data')
+            html.H1('Trap and Dubstep Exploration through YouTube and Spotify Data')
         ])
     ], className='container'),
     html.Div(id='main-app', children=[
@@ -64,8 +63,8 @@ app.layout = html.Div([
                            'Spotify’s library. Brief explanations of each section of the dashboard below.'),
                     html.H5('Filters:'),
                     html.P('Choose to filter the dataset by artists or channels, and through different time ranges by YouTube publish or Spotify release dates. Data points can be differentiated by color through artists or channels.'),
-                    html.H5('Popularity:'),
-                    html.P(''),
+                    html.H5('Feature Summary:'),
+                    html.P('Compare the mean, max, min of a specific feature for each artist.'),
                     html.H5('Compare Features:'),
                     html.P('Select any two features to compare and see if there is a correlation between them.'),
                     html.H5('Feature Distributions:'),
@@ -81,11 +80,11 @@ app.layout = html.Div([
                     html.P('> Not all Spotify tracks of artists in this dataset were included, only those uploaded and shared by the five YouTube channels were selected.'),
                     html.P(''),
                     html.Div([
-                        html.A(html.Img(src='/assets/github.png'), href='https://github.com'),
+                        html.P(''),
+                        html.A(html.Img(src='/assets/github.png'), href='https://github.com/jko0401/IT299-project'),
                         html.A(html.Img(src='/assets/website.png'), href='https://jko0401.github.io/')
-                    ], style={'align': 'center'})
+                    ], className='offset-by-five columns')
                 ], className='six columns pretty_container offset-by-three columns')
-
             ]),
             dcc.Tab(id='dash-tab', label='Dashboard', children=[
                 # Filters, Popularity Plots, Video
@@ -263,22 +262,7 @@ def plot_data(df, color, artists, channels):
     return figures
 
 
-def highlight_max_row(df):
-    df_numeric_columns = df.select_dtypes('number')
-    return [
-        {
-            'if': {
-                'filter_query': '{{id}} = {}'.format(i),
-                'column_id': col
-            },
-            'backgroundColor': '#3D9970',
-            'color': 'white'
-        }
-        # idxmax(axis=1) finds the max indices of each row
-        for (i, col) in enumerate(
-            df_numeric_columns.idxmax(axis=1)
-        )
-    ]
+
 
 @app.callback(
     Output('div-summary', 'children'),
@@ -289,12 +273,16 @@ def highlight_max_row(df):
 def summary_table(df, color, summary):
     dff = pd.read_json(df, orient='split')
     test_sum = dff.groupby('artistname').agg({summary: ['mean', 'min', 'max']}).round(2).transpose()
-    test_sum = pd.DataFrame(test_sum)
+    test_sum = pd.DataFrame(test_sum).reset_index().drop(columns=['level_0']).rename(columns={'level_1': ''})
     figures = dash_table.DataTable(
         data=test_sum.to_dict('records'),
         sort_action='native',
         columns=[{'name': str(i), 'id': str(i)} for i in test_sum.columns],
-        style_data_conditional=highlight_max_row(test_sum)
+        style_header={'backgroundColor': '#00adb5'},
+        style_cell={
+            'backgroundColor': '#222831',
+            'color': '#eeeeee'
+        },
     )
     return figures
 
@@ -319,7 +307,8 @@ def graph_scatter(df, feature_1, feature_2, color, artists, channels):
     else:
         color = None
     figure = px.scatter(dff, x=feature_1, y=feature_2, custom_data=['videoid'],
-                        hover_name='s_track_name', color=color, height=1000)
+                        hover_name='s_track_name', color=color, color_discrete_sequence=color_scheme[:len(artists)],
+                        height=1000)
     if color == 'artistname':
         legend_title = 'Artist'
     else:
@@ -368,6 +357,7 @@ def pca(df, artists, channels):
         xaxis_title='Principal Component 1',
         yaxis_title='Principal Component 2'
     )
+    figure.update_traces(marker=dict(color='#00adb5'))
     return figure
 
 
