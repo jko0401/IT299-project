@@ -9,6 +9,7 @@ import pandas as pd
 from labels import FEATURES, SUMMARY, SCATTER
 
 app = dash.Dash(__name__)
+server = app.server
 
 df = db.main_db()
 df = df.convert_dtypes()
